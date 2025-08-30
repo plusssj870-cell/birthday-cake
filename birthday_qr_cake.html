@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>เป่าเค้กวันเกิด (สแกนด้วย QR)</title>
+  <style>
+    :root{--bg:#FFF7EE;--accent:#E76F51;--cake:#F4A261;--frost:#FFF;--plate:#F0E6D6}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans Thai UI",sans-serif;margin:0;background:linear-gradient(180deg,var(--bg),#fff);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{max-width:900px;width:100%;display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+    .card{background:rgba(255,255,255,0.85);border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(15,15,15,0.08)}
+    .stage{display:flex;align-items:center;justify-content:center;padding:30px}
+    svg{width:100%;max-width:520px;}
+    .controls{display:flex;flex-direction:column;gap:12px}
+    button{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn-blow{background:var(--accent);color:white}
+    .btn-reset{background:#EEF2FF;color:#1f2d5f}
+    .qr-box{display:flex;flex-direction:column;align-items:center;gap:10px}
+    .qr-placeholder{width:200px;height:200px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:linear-gradient(180deg,#fff,#f6f4f2);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+    .note{font-size:13px;color:#444}
+    .flowers{position:absolute;pointer-events:none}
+
+    /* flame animation */
+    .flame{transform-origin:50% 90%;animation:flame 900ms infinite ease-in-out}
+    @keyframes flame{0%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.95}100%{transform:scale(1);opacity:1}}
+
+    /* smoke */
+    .puff{position:absolute;border-radius:50%;opacity:0;pointer-events:none}
+    @keyframes puffUp{0%{transform:translateY(0) scale(0.3);opacity:0.6}70%{opacity:0.3}100%{transform:translateY(-120px) scale(1);opacity:0}}
+
+    /* responsive */
+    @media (max-width:880px){.wrap{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="stage" id="stage">
+        <!-- SVG cake with candles and flowers -->
+        <svg viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" id="cakeSvg">
+          <defs>
+            <linearGradient id="gradCake" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#FFD59E"/>
+              <stop offset="100%" stop-color="#F2A76B"/>
+            </linearGradient>
+          </defs>
+
+          <!-- plate -->
+          <ellipse cx="300" cy="360" rx="220" ry="30" fill="#EFE0D0" />
+
+          <!-- cake body -->
+          <rect x="130" y="180" width="340" height="140" rx="35" ry="35" fill="url(#gradCake)" stroke="#E7A66D" stroke-width="2" />
+
+          <!-- frosting -->
+          <path d="M130 200 q40 -30 80 0 t80 0 t80 0 t80 0" fill="#fff" opacity="0.95" />
+
+          <!-- flowers on cake (simple) -->
+          <g id="flowersOnCake" transform="translate(260,220)">
+            <g transform="translate(-60,-10)">
+              <circle cx="0" cy="0" r="8" fill="#FF6B6B"/>
+              <path d="M-10 0 a10 10 0 0 0 20 0 a10 10 0 0 0 -20 0" fill="#FFD166" opacity="0.9"/>
+            </g>
+            <g transform="translate(40,10)">
+              <circle cx="0" cy="0" r="7" fill="#7ED957"/>
+              <path d="M-8 0 a8 8 0 0 0 16 0 a8 8 0 0 0 -16 0" fill="#FF8FAB" opacity="0.9"/>
+            </g>
+          </g>
+
+          <!-- candles -->
+          <g id="candles">
+            <!-- candle 1 -->
+            <g transform="translate(220,140)" class="candle" data-index="0">
+              <rect x="-6" y="-60" width="12" height="60" rx="3" fill="#fff" stroke="#F4A261"/>
+              <circle class="flame" cx="0" cy="-70" r="8" fill="#FFD166" />
+              <circle class="flame" cx="0" cy="-70" r="4" fill="#FF6B6B" />
+            </g>
+            <!-- candle 2 -->
+            <g transform="translate(300,120)" class="candle" data-index="1">
+              <rect x="-6" y="-80" width="12" height="80" rx="3" fill="#fff" stroke="#7ED957"/>
+              <circle class="flame" cx="0" cy="-90" r="8" fill="#FFD166" />
+              <circle class="flame" cx="0" cy="-90" r="4" fill="#FF6B6B" />
+            </g>
+            <!-- candle 3 -->
+            <g transform="translate(380,140)" class="candle" data-index="2">
+              <rect x="-6" y="-60" width="12" height="60" rx="3" fill="#fff" stroke="#9EC1FF"/>
+              <circle class="flame" cx="0" cy="-70" r="8" fill="#FFD166" />
+              <circle class="flame" cx="0" cy="-70" r="4" fill="#FF6B6B" />
+            </g>
+          </g>
+
+          <!-- simple decorative flowers around cake -->
+          <g transform="translate(40,260)" opacity="0.95">
+            <g transform="translate(0,0)">
+              <circle cx="0" cy="0" r="8" fill="#FF8FAB" />
+            </g>
+            <g transform="translate(520,0)">
+              <circle cx="0" cy="0" r="8" fill="#7ED957" />
+            </g>
+          </g>
+
+        </svg>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px">
+        <div class="controls">
+          <div style="display:flex;gap:8px">
+            <button class="btn-blow" id="btnBlow">เป่าเค้ก (คลิกหรือพูด)</button>
+            <button class="btn-reset" id="btnReset">จุดเทียนใหม่</button>
+          </div>
+          <div class="note">กดปุ่ม "เป่าเค้ก" หรืออนุญาตไมโครโฟนแล้วเป่าเข้าไปใกล้เครื่อง (ถ้าใช้ HTTPS) เพื่อดับเทียน</div>
+        </div>
+        <div style="text-align:right;color:#666;font-size:13px">วันเกิด Happy Birthday 🎂</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-weight:700;font-size:16px">สร้างคิวอาร์โค้ด (QR)</div>
+        <div class="qr-box">
+          <div id="qrcode" class="qr-placeholder"></div>
+          <input id="urlInput" type="text" placeholder="ใส่ URL ที่ต้องการจะสร้างเป็น QR (หรือปล่อยว่างเพื่อตั้งเป็น URL หน้านี้)" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd" />
+          <div style="display:flex;gap:8px">
+            <button id="btnGen" style="flex:1;padding:8px;border-radius:8px;border:0;background:#0ea5a4;color:#fff;font-weight:600">สร้างคิวอาร์</button>
+            <button id="btnDownloadQR" style="padding:8px;border-radius:8px;border:0;background:#64748b;color:#fff;font-weight:600">ดาวน์โหลด</button>
+          </div>
+        </div>
+        <div class="note">วิธีใช้: โฮสต์ไฟล์นี้บนเว็บ (หรือเปิดไฟล์ด้วยเบราว์เซอร์แล้วคัดลอก URL) จากนั้นกด "สร้างคิวอาร์" เพื่อทำ QR ของ URL นั้น — สแกน QR ด้วยมือถือเพื่อเปิดหน้านี้และเป่าเค้ก!</div>
+        <hr />
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-weight:700">ตั้งค่าไมโครโฟน (ตัวเลือก)</div>
+          <div class="note">ถ้าต้องการให้ระบบตรวจจับเสียงเป่า ให้กดปุ่มเป่าแล้วอนุญาตไมโครโฟน</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // Elements
+    const btnBlow = document.getElementById('btnBlow');
+    const btnReset = document.getElementById('btnReset');
+    const qrcodeContainer = document.getElementById('qrcode');
+    const urlInput = document.getElementById('urlInput');
+    const btnGen = document.getElementById('btnGen');
+    const btnDownloadQR = document.getElementById('btnDownloadQR');
+    const stage = document.getElementById('stage');
+
+    // Candle/flame state
+    let candlesLit = true;
+    const flameEls = document.querySelectorAll('.flame');
+    const candleGroups = document.querySelectorAll('.candle');
+
+    function extinguish() {
+      if (!candlesLit) return;
+      candlesLit = false;
+      flameEls.forEach(el => el.style.transition = 'opacity 420ms, transform 420ms', el.style.opacity = 0);
+      // create smoke puffs above each candle
+      candleGroups.forEach((c, idx) => {
+        const rect = c.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const centerX = rect.left + rect.width/2 - stageRect.left;
+        const centerY = rect.top - stageRect.top - 30;
+        for (let i=0;i<3;i++) createPuff(centerX + (Math.random()*40-20), centerY + (Math.random()*8-6), 8 + Math.random()*12, 600 + Math.random()*400);
+      });
+    }
+
+    function relight() {
+      candlesLit = true;
+      flameEls.forEach(el => {el.style.opacity = 1;});
+    }
+
+    btnBlow.addEventListener('click', () => {
+      // Try to use microphone method: ask permission and listen for a puff
+      tryStartListeningOnce();
+      // also immediate feedback
+      setTimeout(() => extinguish(), 350);
+    });
+    btnReset.addEventListener('click', () => relight());
+
+    // Puff creation
+    function createPuff(x,y,size,duration){
+      const puff = document.createElement('div');
+      puff.className='puff';
+      puff.style.left = (x- size/2) + 'px';
+      puff.style.top = (y- size/2) + 'px';
+      puff.style.width = size + 'px';
+      puff.style.height = size + 'px';
+      puff.style.background = 'rgba(120,120,120,0.18)';
+      puff.style.filter = 'blur(2px)';
+      puff.style.animation = `puffUp ${duration}ms forwards ease-out`;
+      stage.appendChild(puff);
+      setTimeout(()=> puff.remove(), duration+50);
+    }
+
+    // Simple microphone loudness detection (one-shot)
+    async function tryStartListeningOnce(){
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        src.connect(analyser);
+        const data = new Uint8Array(analyser.fftSize);
+        let start = performance.now();
+        let heard = false;
+        function poll(){
+          analyser.getByteTimeDomainData(data);
+          // compute RMS-like value
+          let sum = 0;
+          for (let i=0;i<data.length;i++){ const v = (data[i]-128)/128; sum += v*v; }
+          const rms = Math.sqrt(sum/data.length);
+          // if strong short burst (like a blow) detected
+          if (rms > 0.07) { heard = true; }
+          if (performance.now() - start < 2000) requestAnimationFrame(poll);
+          else {
+            stream.getTracks().forEach(t=>t.stop());
+            if (heard) extinguish();
+          }
+        }
+        poll();
+      } catch(e){ console.log('mic denied or error',e); }
+    }
+
+    // Keyboard shortcut: space to blow
+    window.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); extinguish(); } });
+
+    // QR code generation
+    let qrcode = null;
+    function generateQR(text){
+      qrcodeContainer.innerHTML='';
+      qrcode = new QRCode(qrcodeContainer, {text, width:200, height:200});
+    }
+    // default: current page URL
+    function initQR(){
+      const defaultUrl = location.href;
+      urlInput.value = '';
+      generateQR(defaultUrl);
+    }
+    btnGen.addEventListener('click', ()=>{
+      const val = urlInput.value.trim() || location.href;
+      generateQR(val);
+    });
+    btnDownloadQR.addEventListener('click', ()=>{
+      // find img or canvas inside qrcode container
+      const img = qrcodeContainer.querySelector('img');
+      if (img) {
+        const url = img.src;
+        const a = document.createElement('a'); a.href = url; a.download = 'qr.png'; a.click();
+        return;
+      }
+      const canvas = qrcodeContainer.querySelector('canvas');
+      if (canvas){ const url = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = url; a.download = 'qr.png'; a.click(); }
+    });
+
+    initQR();
+
+    // Small accessibility: announce state
+    function announce(text){
+      let sr = document.getElementById('srAnn');
+      if (!sr){ sr = document.createElement('div'); sr.id='srAnn'; sr.setAttribute('aria-live','polite'); sr.style.position='absolute'; sr.style.left='-9999px'; document.body.appendChild(sr); }
+      sr.textContent = text;
+    }
+
+  </script>
+</body>
+</html>
